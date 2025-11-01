@@ -14,10 +14,11 @@ public class MiniKafkaApplication {
 //        SpringApplication.run(MiniKafkaApplication.class, args);
 
         Broker broker = new Broker();
+        broker.createTopic("orders",2);
 
-        Thread producer = new Thread(new ProducerWorker(broker,100), "Producer");
-        Thread consumer1 = new Thread(new ConsumerWorker(broker,"C1"));
-        Thread consumer2 = new Thread(new ConsumerWorker(broker,"C2"));
+        Thread producer = new Thread(new ProducerWorker(broker,"orders",100), "Producer");
+        Thread consumer1 = new Thread(new ConsumerWorker(broker.getPartition("orders",0),"C1"));
+        Thread consumer2 = new Thread(new ConsumerWorker(broker.getPartition("orders",1),"C2"));
 
         producer.start();
         consumer1.start();

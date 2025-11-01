@@ -2,20 +2,27 @@ package com.streamlite.mini_kafka.broker;
 
 import com.streamlite.mini_kafka.model.Message;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Broker {
-    private final BlockingQueue<Message> queue = new LinkedBlockingQueue<>();
+    private final ConcurrentHashMap<String,Topic> topics = new ConcurrentHashMap<>();
 
-    public void produce(Message msg) throws InterruptedException{
-        queue.put(msg);
-        System.out.println("[BROKER] Produced: "+ msg.getValue());
+    public void createTopic(String name,int numPartitions){
+        topics.putIfAbsent(name, new Topic(name,numPartitions));
     }
 
-    public Message consume() throws InterruptedException{
-        Message msg = queue.take();
-        System.out.println("[BROKER] Consumed: "+ msg.getValue());
-        return msg;
+    public void produce(String topicName, Message msg) throws InterruptedException{
+        Topic topic = topics.get(topicName);
+        if (topic==null) throw new IllegalArgumentException("Topic not found: " + topicName);
+        topic.produce(msg);
     }
+
+    public Partition getPartition(String topicName, int PartitionId){
+        return topics.get(topicName).getPartitions().get(PartitionId);
+    }
+
+    public int getNumPartitions(String topicName){
+        return topics.get(topicName).getPartitions().size();
+    }
+
 }

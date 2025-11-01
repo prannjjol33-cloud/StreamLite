@@ -1,14 +1,14 @@
 package com.streamlite.mini_kafka.threads;
 
-import com.streamlite.mini_kafka.broker.Broker;
+import com.streamlite.mini_kafka.broker.Partition;
 import com.streamlite.mini_kafka.model.Message;
 
 public class ConsumerWorker implements Runnable{
-    private final Broker broker;
+    private final Partition partition;
     private final String name;
 
-    public ConsumerWorker(Broker broker, String name) {
-        this.broker = broker;
+    public ConsumerWorker(Partition partition, String name) {
+        this.partition = partition;
         this.name = name;
     }
 
@@ -16,7 +16,7 @@ public class ConsumerWorker implements Runnable{
     public void run(){
         try {
             while (true){
-                Message msg = broker.consume();
+                Message msg = partition.take();
                 System.out.println("[CONSUMER- "+ name +"] processed: "+ msg.getValue());
                 Thread.sleep(100);
             }
